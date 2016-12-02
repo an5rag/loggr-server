@@ -1,6 +1,6 @@
 module.exports = {
 
     'secret': 'mySuperSecretMessage',
-    'database': 'mongodb://localhost:27017/loggr-sample-db'
+    'database': 'mongodb://an5rag:anuragmlab@ds119718.mlab.com:19718/loggr-sample'
 
 };
