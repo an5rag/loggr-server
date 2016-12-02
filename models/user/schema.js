@@ -9,12 +9,12 @@ const UserSchema = Schema({
     email: {type: String, required: true, trim: true},
     userType: {
         type: String,
-        enum: ['EMPLOYEE', 'MANAGER', 'OWNER'],
+        enum: ['EMPLOYEE', 'MANAGER', 'ADMIN'],
         default: 'EMPLOYEE'
     },
-    phone: {type: String, required: true, trim: true},
-    companyId: {type: String, default: '000'}
+    phone: {type: String, trim: true},
+    companyId: {type: String, default: '000'},
+    password: {type: String}
 });
 
-UserSchema.plugin(passportLocalMongoose);
 module.exports = mongoose.model('User', UserSchema, 'users');

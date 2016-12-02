@@ -1,7 +1,8 @@
 var express = require('express');
 var router = express.Router();
 var User = require('./schema');
-const passport = require('passport');
+const jwt = require('jsonwebtoken'); // used to create, sign, and verify tokens
+const config = require('../../config'); // get our config file
 
 /**
  * Register a new User
@@ -12,10 +13,11 @@ router.post('/register', (req, res) => {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
         email: req.body.email,
-        userType: req.body.userType
+        userType: req.body.userType,
+        password: req.body.password
     });
 
-    User.register(newUser, req.body.password, (err, user) => {
+    newUser.save((err, user) => {
         if (err) {
             var errors = [];
             if (err.name == 'ValidationError') {
@@ -39,31 +41,62 @@ router.post('/register', (req, res) => {
     });
 });
 
-/**
- * Login an existing User
- */
-router.post('/login', passport.authenticate('local'), function(req, res) {
-    res.status(200).json({
-        success: true,
-        username: req.user.username
+router.get('/', (req, res) => {
+    const users = User.find().exec((err, users) => {
+        res.send({
+            success: true,
+            users
+        });
     });
+
 });
 
-/**
- * Get Login
- */
+router.post('/authenticate', function(req, res) {
+    // find the user
+    User.findOne({
+        username: req.body.username
+    }, function(err, user) {
 
-router.get('/login', (req, res) => {
-    if (req.user) {
-        return res.send({
-            success: true,
-            user: req.user
-        });
-    }
+        if (err) throw err;
 
-    res.send({
-        success: false,
-        message: 'No user logged in.'
+        if (!user) {
+            res.status(401).json({
+                success: false,
+                message: 'Authentication failed. User not found.'
+            });
+        } else if (user) {
+
+            // check if password matches
+            if (user.password != req.body.password) {
+                res.status(401).json({
+                    success: false,
+                    message: 'Authentication failed. Wrong password.'
+                });
+            } else {
+
+                // if user is found and password is right
+                // create a token
+                var userToken = {
+                    username: user.username,
+                    userType: user.userType
+                };
+
+                var token = jwt.sign(userToken, config.secret, {
+                    expiresIn: 1 * 60 * 60 // expires in 1 hours
+                });
+
+                // return the information including token as JSON
+                res.json({
+                    success: true,
+                    token: token,
+                    username: user.username,
+                    name: user.firstName,
+                    userType: user.userType
+                });
+            }
+
+        }
+
     });
 });
 

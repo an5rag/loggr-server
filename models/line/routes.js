@@ -1,31 +1,25 @@
 const express = require('express');
 const router = express.Router();
 const Line = require('./schema');
-const auth = require('./../services.js');
+const authenticate = require('./../services');
 
 /**
  * Add a new Line
  */
+
+// router.use(authenticate);
+
 router.post('/', (req, res, next) => {
-
-    // // if no user is signed in, then return 401 Unauthorized
-    // if (!req.user) {
-    //     return res.status(401).json({
-    //         success: false,
-    //         error: 'loginError'
-    //     });
-    // }
-
-    console.log(req.body);
     const body = req.body;
     const newLine = new Line({
         name: body.name,
         description: body.description,
         constraints: body.constraints,
         companyId: body.companyId,
+        creator: body.creator,
         managers: body.managers
     });
-    // if (req.user && req.user.userType == 'EMPLOYEE') {
+
     if (false) {
         res.status(403).json({
             success: false,
@@ -34,6 +28,7 @@ router.post('/', (req, res, next) => {
     } else {
         newLine.save((err, line) => {
             if (err) {
+                console.log(err);
                 return res.status(422).json({
                     error: err.name,
                     message: err.message,
@@ -41,7 +36,7 @@ router.post('/', (req, res, next) => {
             } else {
                 res.status(201).json({
                     message: 'Line Added!',
-                    line
+                    line: line
                 });
             }
         });
@@ -56,32 +51,26 @@ router.post('/', (req, res, next) => {
  *
  */
 router.get('/', (req, res) => {
-
-    // // if no user is signed in, then return 401 Unauthorized
-    // if (!req.user) {
-    //     return res.status(401).json({
-    //         success: false,
-    //         error: 'loginError'
-    //     });
-    // }
-
     const query = {};
     var limit = query.limit ? parseInt(req.query.limit.toString()) : null;
     const sort = req.query.sortBy ? req.query.sortBy : {};
     const order = req.query.order ? req.query.oder : {};
+
     for (var key in req.query) {
         if (key != 'limit' && key != 'sort' && key != 'order') {
             query[key] = req.query[key];
         }
     }
 
-    lines = Line.findLines((err, lines) => {
+    lines = Line.find((err, lines) => {
         if (err) {
             res.status(500).json({
                 error: err.message
             })
         } else {
-            res.status(200).send(lines);
+            res.status(200).json({
+                lines
+            });
         }
     }, query, limit);
 
