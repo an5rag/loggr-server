@@ -53,7 +53,7 @@ router.post('/', (req, res, next) => {
  */
 router.get('/', (req, res) => {
     const query = {};
-    var limit = query.limit ? parseInt(req.query.limit.toString()) : null;
+    var limit = req.query.limit ? parseInt(req.query.limit.toString()) : null;
     const sort = req.query.sortBy ? req.query.sortBy : {};
     const order = req.query.order ? req.query.oder : {};
 
@@ -84,4 +84,23 @@ router.get('/', (req, res) => {
 
 });
 
+// update entry by id
+router.put('/', function(req, res) {
+    Entry.findByIdAndUpdate(req.query.id, req.body, {
+        new: true
+    }, (err, entry) => {
+        if (err) {
+            res.status(500).json({
+                error: err.message
+            })
+        } else {
+            res.status(200).json({
+                entry
+            });
+        }
+    });
+
+});
+
 module.exports = router;
+ports = router;

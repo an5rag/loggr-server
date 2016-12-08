@@ -20,8 +20,8 @@ var EntrySchema = Schema({
         type: String
     },
     inProgress: {
-        type: String,
-        default: 'Yes'
+        type: Boolean,
+        default: true
     },
     createdOn: {
         type: Date
