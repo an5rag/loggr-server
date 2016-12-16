@@ -63,7 +63,47 @@ router.get('/', (req, res) => {
         }
     }
 
-    console.log(query);
+    Entry.find(query)
+        .limit(limit)
+        .sort({
+            createdOn: 'desc'
+        })
+        .exec((err, entries) => {
+            if (err) {
+                res.status(500).json({
+                    error: err.message
+                })
+            } else {
+                Entry.count(query, function(err, count) {
+                    res.status(200).json({
+                        entries,
+                        count
+                    });
+                });
+            }
+        });
+
+});
+/**
+ * Gets all in Progress entries
+ * Params:
+ * limit (number)
+ * column (value)
+ *
+ */
+router.get('/inprogress', (req, res) => {
+    const query = {};
+    var limit = req.query.limit ? parseInt(req.query.limit.toString()) : null;
+    const sort = req.query.sortBy ? req.query.sortBy : {};
+    const order = req.query.order ? req.query.oder : {};
+
+    for (var key in req.query) {
+        if (key != 'limit' && key != 'sort' && key != 'order') {
+            query[key] = req.query[key];
+        }
+    }
+
+    query.inProgress = true;
 
     Entry.find(query)
         .limit(limit)
@@ -76,8 +116,11 @@ router.get('/', (req, res) => {
                     error: err.message
                 })
             } else {
-                res.status(200).json({
-                    entries
+                Entry.count(query, function(err, count) {
+                    res.status(200).json({
+                        entries,
+                        count
+                    });
                 });
             }
         });

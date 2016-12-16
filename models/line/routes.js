@@ -76,4 +76,23 @@ router.get('/', (req, res) => {
 
 });
 
+// update line by id
+router.put('/', function(req, res) {
+    const id = req.query.id? req.query.id : req.body.id;
+    Line.findByIdAndUpdate(id, req.body, {
+        new: true
+    }, (err, line) => {
+        if (err) {
+            res.status(500).json({
+                error: err.message
+            })
+        } else {
+            res.status(200).json({
+                line
+            });
+        }
+    });
+
+});
+
 module.exports = router;
