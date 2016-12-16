@@ -10,23 +10,20 @@ var EntrySchema = Schema({
         required: true,
         trim: true
     },
-    lineName: {
+    'Employee Clock In': {
         type: String
     },
-    creator: {
-        type: String
-    },
-    ender: {
+    'Employee Clock Out': {
         type: String
     },
     inProgress: {
         type: Boolean,
         default: true
     },
-    createdOn: {
+    'System Clock In': {
         type: Date
     },
-    endedOn: {
+    'System Clock Out': {
         type: Date
     }
 }, {

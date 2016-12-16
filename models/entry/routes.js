@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const Entry = require('./schema');
+const Line = require('../line/schema');
 const authenticate = require('./../services');
+const json2csv = require('json2csv');
+var fs = require('fs');
+const _ = require('lodash');
 
 /**
  * Add a new Entry
@@ -14,11 +18,11 @@ router.post('/', (req, res, next) => {
     const newEntry = new Entry(Object.assign({}, body.constraints, {
         lineId: body.lineId,
         lineName: body.lineName,
-        creator: body.creator,
-        inProgress: body.ended,
-        createdOn: body.createdOn,
-        endedOn: body.endedOn,
-        ender: body.ender
+        'Employee Clock In': body['Employee Clock In'],
+        'Employee Clock Out': body['Employee Clock Out'],
+        'System Clock In': body['System Clock In'],
+        'System Clock Out': body['System Clock Out'],
+        'inProgress': body.inProgress
     }));
 
     if (false) {
@@ -55,7 +59,6 @@ router.get('/', (req, res) => {
     const query = {};
     var limit = req.query.limit ? parseInt(req.query.limit.toString()) : null;
     const sort = req.query.sortBy ? req.query.sortBy : {};
-    const order = req.query.order ? req.query.oder : {};
 
     for (var key in req.query) {
         if (key != 'limit' && key != 'sort' && key != 'order') {
@@ -64,9 +67,10 @@ router.get('/', (req, res) => {
     }
 
     Entry.find(query)
+        .lean()
         .limit(limit)
         .sort({
-            createdOn: 'desc'
+            'System Clock In': 'desc'
         })
         .exec((err, entries) => {
             if (err) {
@@ -84,48 +88,66 @@ router.get('/', (req, res) => {
         });
 
 });
+
 /**
- * Gets all in Progress entries
- * Params:
- * limit (number)
- * column (value)
- *
- */
-router.get('/inprogress', (req, res) => {
-    const query = {};
-    var limit = req.query.limit ? parseInt(req.query.limit.toString()) : null;
-    const sort = req.query.sortBy ? req.query.sortBy : {};
-    const order = req.query.order ? req.query.oder : {};
+Gets csv file
+**/
+router.get('/export/', function(req, res) {
+    const query = {lineId: req.query.lineId};
+    query['System Clock In']={"$gte": (req.query.startDate ? req.query.startDate : new Date(-8640000000000000)), "$lt": (req.query.endDate? req.query.endDate : new Date())};
 
-    for (var key in req.query) {
-        if (key != 'limit' && key != 'sort' && key != 'order') {
-            query[key] = req.query[key];
-        }
-    }
+    const fields = [
+        'System Clock In',
+        'System Clock Out',
+        'Employee Clock In',
+        'Employee Clock Out',
+        'inProgress'
+    ]
 
-    query.inProgress = true;
+    Line.findById(req.query.lineId, function (err, line) {
+          if(err) {
+              return next(err);
+          }
+          if(!line) {
+              return res.send(404);
+          }
+          for(var i = 0; i <line.constraints.length; i++){
+              fields.push(line.constraints[i].name);
+          }
+          Entry.find(query)
+            .lean()
+              .sort({
+                  'System Clock In': 'desc'
+              })
+              .exec((err, entries) => {
+                  if (err) {
+                      res.status(500).json({
+                          error: err.message
+                      })
+                  } else {
+                      var csv = '';
+                      _.forEach(fields, function(field) {
+                            csv += (field + ',')
+                      });
+                      csv = csv.slice(0, -1);
+                      csv+='\n';
 
-    Entry.find(query)
-        .limit(limit)
-        .sort({
-            createdOn: 'desc'
-        })
-        .exec((err, entries) => {
-            if (err) {
-                res.status(500).json({
-                    error: err.message
-                })
-            } else {
-                Entry.count(query, function(err, count) {
-                    res.status(200).json({
-                        entries,
-                        count
-                    });
-                });
-            }
-        });
+                      _.forEach(entries, function(entry) {
+                          _.forEach(fields, function(field){
 
-});
+                              csv += (entry[field] != undefined? entry[field]+',' : ',');
+                          })
+                          csv+='\n';
+                        });
+
+                      //csv = json2csv({ data: entries, fields});
+                      console.log(csv);
+                      res.set({"Content-Disposition":"attachment; filename=\"export.csv\""});
+                      res.send(csv);
+                  }
+          });
+    });
+})
 
 // update entry by id
 router.put('/', function(req, res) {

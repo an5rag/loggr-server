@@ -1,0 +1,9 @@
+entry: lineid, contraintValues, time_created, author, time_ended, ender
+
+functons:
+* create (post)
+* end Entry
+* get(line_id, limit)
+* update(entry_id, new_constraintValues)
+* delete
+* get(entry_id)

@@ -53,8 +53,6 @@ router.post('/', (req, res, next) => {
 router.get('/', (req, res) => {
     const query = {};
     var limit = query.limit ? parseInt(req.query.limit.toString()) : null;
-    const sort = req.query.sortBy ? req.query.sortBy : {};
-    const order = req.query.order ? req.query.oder : {};
 
     for (var key in req.query) {
         if (key != 'limit' && key != 'sort' && key != 'order') {
@@ -93,6 +91,27 @@ router.put('/', function(req, res) {
         }
     });
 
+});
+
+router.delete('/:id', function(req, res, next) {
+  Line.findById(req.params.id, function (err, line) {
+    if(err) {
+        return next(err);
+    }
+    if(!line) {
+        return res.send(404);
+    }
+    line.remove(function(err) {
+        if (err) {
+            res.statusCode = 403;
+            res.send(err);
+        } else {
+            res.send({
+                message: 'Line deleted!'
+            });
+        }
+    });
+  });
 });
 
 module.exports = router;
