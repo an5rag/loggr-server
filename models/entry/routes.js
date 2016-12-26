@@ -135,7 +135,7 @@ router.get('/export/', function(req, res) {
                       _.forEach(entries, function(entry) {
                           _.forEach(fields, function(field){
 
-                              csv += (entry[field] != undefined? entry[field]+',' : ',');
+                              csv += (entry[field] != undefined? String(entry[field])+',' : ',');
                           })
                           csv+='\n';
                         });
