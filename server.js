@@ -43,15 +43,18 @@ app.use('/api/entry', require('./models/entry/routes'));
 // CONNECT DATABASE AND START THE SERVER
 // ==============================================
 
-// Use environment defined port or 4000
-const port = process.env.PORT || 4000;
-
-mongoose.connect(config.database);
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function() {
-    console.log("Connected to the database!");
-    app.listen(port, () => {
-        console.log("Listening on port:", port);
+// Use environment defined port or command-line argument or 4000
+const port = process.env.PORT || process.argv[3] || 4000;
+if(process.argv[2] == undefined) {
+    console.log('No database link provided! \nPlease restart the application using command-line and provide the link as an argument.');
+} else {
+    mongoose.connect(process.argv[2]);
+    const db = mongoose.connection;
+    db.on('error', console.error.bind(console, 'connection error:'));
+    db.once('open', function() {
+        console.log("Connected to the database!\n", process.argv[2]);
+        app.listen(port, () => {
+            console.log("Listening on port:", port);
+        });
     });
-});
+}

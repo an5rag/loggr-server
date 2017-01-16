@@ -33,7 +33,6 @@ router.post('/', (req, res, next) => {
     } else {
         newEntry.save((err, entry) => {
             if (err) {
-                console.log(err);
                 return res.status(422).json({
                     error: err.name,
                     message: err.message,
@@ -125,23 +124,28 @@ router.get('/export/', function(req, res) {
                           error: err.message
                       })
                   } else {
-                      var csv = '';
-                      _.forEach(fields, function(field) {
-                            csv += (field + ',')
-                      });
-                      csv = csv.slice(0, -1);
-                      csv+='\n';
 
-                      _.forEach(entries, function(entry) {
+                    //   var csv = '';
+                    //   _.forEach(fields, function(field) {
+                    //         csv += (field + ',')
+                    //   });
+                    //   csv = csv.slice(0, -1);
+                    //   csv+='\n';
+                      //
+                    //   _.forEach(entries, function(entry) {
+                    //       _.forEach(fields, function(field){
+                      //
+                    //           csv += (entry[field] != undefined? String(entry[field])+',' : ',');
+                    //       })
+                    //       csv+='\n';
+                    //     });
+                    _.forEach(entries, function(entry) {
                           _.forEach(fields, function(field){
 
-                              csv += (entry[field] != undefined? String(entry[field])+',' : ',');
+                              entry[field] = (entry[field] != undefined? String(entry[field]) : '');
                           })
-                          csv+='\n';
                         });
-
-                      //csv = json2csv({ data: entries, fields});
-                      console.log(csv);
+                      var csv = json2csv({ data: entries, fields});
                       res.set({"Content-Disposition":"attachment; filename=\"export.csv\""});
                       res.send(csv);
                   }

@@ -41,6 +41,33 @@ router.post('/register', (req, res) => {
     });
 });
 
+router.get('/initialize', (req, res) => {
+    const newUser = new User({
+        username: 'admin',
+        firstName: 'Administrator',
+        lastName: '',
+        userType: 'ADMIN',
+        password: 'admin'
+    });
+
+    newUser.save((err, user) => {
+        if (err) {
+            return res.status(422).json({
+                success: false,
+                error: err.name,
+                message: err.message
+            });
+        } else {
+            res.status(201).json({
+                success: true,
+                message: 'Default Admin Added!',
+                user
+            });
+        }
+    });
+});
+
+
 router.get('/', (req, res) => {
     const users = User.find().exec((err, users) => {
         res.send({
