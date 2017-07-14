@@ -143,7 +143,6 @@ router.get('/export/', function (req, res) {
                         _.forEach(fields, function (field) {
                             if(field.type.toLowerCase() === "time" || field.type.toLowerCase() === "date") {
                                 if (entry[field.name] && moment(entry[field.name]).isValid()) {
-                                    console.log(field.name, entry[field.name]);
                                     entry[field.name] = moment(entry[field.name]).format("MM/DD/YYYY HH:mm:ss");
                                 }
                             }
