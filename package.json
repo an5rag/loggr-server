@@ -33,6 +33,7 @@
     "json2csv": "^3.7.3",
     "jsonwebtoken": "^7.1.9",
     "lodash": "^4.17.2",
+    "moment": "^2.18.1",
     "mongodb": "^2.2.11",
     "mongoose": "^4.6.5",
     "nodemailer": "^2.6.4",
