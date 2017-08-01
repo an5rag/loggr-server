@@ -141,7 +141,12 @@ router.get('/export/', function (req, res) {
                 } else {
                     _.forEach(entries, function (entry) {
                         _.forEach(fields, function (field) {
-                            if(field.type.toLowerCase() === "time" || field.type.toLowerCase() === "date") {
+
+                            if (!field || !field.type) {
+                                console.log(field.name + " does not have a type. If you see this log, please report to the administrator.");
+                            }
+
+                            if (field && field.type && (field.type.toLowerCase() === "time" || field.type.toLowerCase() === "date")) {
                                 if (entry[field.name] && moment(entry[field.name]).isValid()) {
                                     entry[field.name] = moment(entry[field.name]).format("MM/DD/YYYY HH:mm:ss");
                                 }
